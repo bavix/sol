@@ -27,10 +27,6 @@ func New(cfg *config.Config) *App {
 
 // Run starts the application.
 func (a *App) Run() error {
-	if err := a.cfg.Validate(); err != nil {
-		return err
-	}
-
 	ip, mac, err := getIPv4AndMAC(a.cfg.InterfaceName)
 	if err != nil {
 		return fmt.Errorf("failed to get IP/MAC for interface %q: %w", a.cfg.InterfaceName, err)
