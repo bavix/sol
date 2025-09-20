@@ -1,0 +1,39 @@
+run:
+  go: "1.25"
+  timeout: 1m
+linters:
+  enable-all: true
+  disable:
+    # turn on later
+    # - godox
+    # deprecated
+    - gomnd
+    - execinquery
+    # not relevant
+    - varnamelen
+    - wrapcheck
+linters-settings:
+  lll:
+    line-length: 140
+  gci:
+    sections:
+      - Standard
+      - Default
+      - Prefix(github.com/bavix)
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com
+issues:
+  exclude-rules:
+    - path: cmd/*
+      linters:
+        - gochecknoglobals
+        - gochecknoinits
+        - exhaustruct
+        - mnd
+    - path: (.+)_test.go
+      linters:
+        - dupl
