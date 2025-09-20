@@ -2,6 +2,10 @@
 
 sol is a service that listens for Wake-on-LAN magic packets and shuts down the system when received.
 
+## Inspiration
+
+This project was inspired by the article ["Выключаем компьютер через Wake-on-Lan"](https://habr.com/ru/articles/816765/) on Habr, which demonstrates how to repurpose Wake-on-LAN packets for shutdown functionality instead of wake-up.
+
 ## Description of the service
 
 The sol service is built using [cobra](https://github.com/spf13/cobra) CLI framework and Go standard library.
