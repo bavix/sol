@@ -1,39 +1,64 @@
-run:
-  go: "1.25"
-  timeout: 1m
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
-    # turn on later
-    # - godox
-    # deprecated
-    - gomnd
-    - execinquery
-    # not relevant
+    - exhaustruct
+    - godox
+    - paralleltest
     - varnamelen
     - wrapcheck
-linters-settings:
-  lll:
-    line-length: 140
-  gci:
-    sections:
-      - Standard
-      - Default
-      - Prefix(github.com/bavix)
-  depguard:
+    - wsl
+    - tagliatelle
+    - noinlineerr
+  settings:
+    depguard:
+      rules:
+        main:
+          allow:
+            - $gostd
+            - github.com
+            - golang.org
+            - google.golang.org
+    lll:
+      line-length: 140
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      main:
-        allow:
-          - $gostd
-          - github.com
-issues:
-  exclude-rules:
-    - path: cmd/*
-      linters:
-        - gochecknoglobals
-        - gochecknoinits
-        - exhaustruct
-        - mnd
-    - path: (.+)_test.go
-      linters:
-        - dupl
+      - linters:
+          - dupl
+        path: (.+)_test.go
+      - linters:
+          - gochecknoglobals
+          - gochecknoinits
+        path: cmd/
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - Standard
+        - Default
+        - Prefix(github.com/bavix)
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
