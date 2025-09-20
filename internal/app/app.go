@@ -2,6 +2,7 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,6 +12,26 @@ import (
 	"runtime"
 
 	"github.com/bavix/sol/internal/config"
+)
+
+const (
+	// WoLPortDefault is the default UDP port for Wake-on-LAN.
+	WoLPortDefault = 9
+	// BufferSize is the size of the UDP receive buffer.
+	BufferSize = 2048
+	// MagicPacketHeaderSize is the size of the magic packet header (6 bytes of 0xFF).
+	MagicPacketHeaderSize = 6
+	// MagicPacketRepeatCount is the number of times the MAC address is repeated.
+	MagicPacketRepeatCount = 16
+	// MacAddressSize is the size of a MAC address in bytes.
+	MacAddressSize = 6
+)
+
+var (
+	// ErrNoMACAddress indicates that the interface has no MAC address.
+	ErrNoMACAddress = errors.New("interface has no MAC address")
+	// ErrNoSuitableIP indicates that no suitable IPv4 address was found.
+	ErrNoSuitableIP = errors.New("no suitable IPv4 address found on interface")
 )
 
 // App represents the main application.
@@ -27,10 +48,6 @@ func New(cfg *config.Config) *App {
 
 // Run starts the application.
 func (a *App) Run() error {
-	if err := a.cfg.Validate(); err != nil {
-		return err
-	}
-
 	ip, mac, err := getIPv4AndMAC(a.cfg.InterfaceName)
 	if err != nil {
 		return fmt.Errorf("failed to get IP/MAC for interface %q: %w", a.cfg.InterfaceName, err)
@@ -42,6 +59,7 @@ func (a *App) Run() error {
 
 	// Bind to 0.0.0.0 to reliably receive broadcast packets (255.255.255.255)
 	addr := &net.UDPAddr{IP: net.IPv4zero, Port: a.cfg.Port}
+
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		return fmt.Errorf("failed to bind UDP %s:%d: %w", addr.IP.String(), a.cfg.Port, err)
@@ -50,20 +68,23 @@ func (a *App) Run() error {
 
 	log.Printf("Listening on %s:%d (Shutdown-on-LAN)", addr.IP.String(), a.cfg.Port)
 
-	buf := make([]byte, 2048)
+	buf := make([]byte, BufferSize)
 	for {
 		n, src, err := conn.ReadFromUDP(buf)
 		if err != nil {
 			log.Printf("read error: %v", err)
+
 			continue
 		}
 
 		pkt := buf[:n]
 		if isMagicPacket(pkt, expected) {
 			log.Printf("Magic packet match from %s — triggering %s", src, ternary(a.cfg.DryRun, "DRY-RUN", "shutdown"))
+
 			if a.cfg.DryRun {
 				continue
 			}
+
 			if err := shutdown(); err != nil {
 				log.Printf("shutdown failed: %v", err)
 			}
@@ -79,36 +100,42 @@ func getIPv4AndMAC(name string) (net.IP, net.HardwareAddr, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	addrs, err := iface.Addrs()
 	if err != nil {
 		return nil, nil, err
 	}
+
 	for _, a := range addrs {
-		switch v := a.(type) {
-		case *net.IPNet:
-			ip := v.IP.To4()
+		if ipNet, ok := a.(*net.IPNet); ok {
+			ip := ipNet.IP.To4()
 			if ip != nil && !ip.IsLoopback() {
 				if len(iface.HardwareAddr) == 0 {
-					return nil, nil, errors.New("interface has no MAC address")
+					return nil, nil, ErrNoMACAddress
 				}
+
 				return ip, iface.HardwareAddr, nil
 			}
 		}
 	}
-	return nil, nil, errors.New("no suitable IPv4 address found on interface")
+
+	return nil, nil, ErrNoSuitableIP
 }
 
 // buildMagicPacket constructs 6x 0xFF followed by 16x MAC (6 bytes each).
 func buildMagicPacket(mac net.HardwareAddr) []byte {
-	pkt := make([]byte, 6+16*6)
-	for i := 0; i < 6; i++ {
+	pkt := make([]byte, MagicPacketHeaderSize+MagicPacketRepeatCount*MacAddressSize)
+
+	for i := range MagicPacketHeaderSize {
 		pkt[i] = 0xFF
 	}
-	o := 6
-	for i := 0; i < 16; i++ {
-		copy(pkt[o:o+6], mac)
-		o += 6
+
+	o := MagicPacketHeaderSize
+	for range MagicPacketRepeatCount {
+		copy(pkt[o:o+MacAddressSize], mac)
+		o += MacAddressSize
 	}
+
 	return pkt
 }
 
@@ -118,6 +145,9 @@ func isMagicPacket(got []byte, expected []byte) bool {
 	return bytes.Contains(got, expected)
 }
 
+// ErrUnsupportedOS indicates that the operating system is not supported.
+var ErrUnsupportedOS = errors.New("unsupported operating system")
+
 func shutdown() error {
 	switch runtime.GOOS {
 	case "windows":
@@ -126,20 +156,22 @@ func shutdown() error {
 		// On macOS, 'shutdown -h now' also works; may require sudo.
 		return execCmd("shutdown", "-h", "now")
 	default:
-		return fmt.Errorf("unsupported OS: %s", runtime.GOOS)
+		return fmt.Errorf("%w: %s", ErrUnsupportedOS, runtime.GOOS)
 	}
 }
 
 func execCmd(name string, args ...string) error {
-	cmd := exec.Command(name, args...)
+	cmd := exec.CommandContext(context.Background(), name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
 	return cmd.Run()
 }
 
-func ternary[T any](cond bool, a, b T) T {
+func ternary(cond bool, a, b string) string {
 	if cond {
 		return a
 	}
+
 	return b
 }

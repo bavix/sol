@@ -1,0 +1,13 @@
+name: go release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    uses: bavix/.github/.github/workflows/go-release-binary.yml@0.3.3
+    with:
+      executable_compression: upx -v -9
