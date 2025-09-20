@@ -1,6 +1,6 @@
-# sol
+# SoL - Shutdown on LAN
 
-sol is a service that listens for Wake-on-LAN magic packets and shuts down the system when received.
+SoL is a service that listens for Wake-on-LAN magic packets and shuts down the system when received.
 
 ## Inspiration
 
