@@ -30,11 +30,11 @@ sol listen --iface eth0
 
 ## Installation
 
-### Download and Install
+### Linux
+
+#### Linux AMD64 (x86_64)
 
 1. **Download the archive**
-
-   Download the latest release:
 
    ```bash
    wget https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-amd64.tar.gz
@@ -46,45 +46,160 @@ sol listen --iface eth0
    curl -L -o sol-v0.0.2-linux-amd64.tar.gz https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-amd64.tar.gz
    ```
 
-2. **Extract the archive**
-
-   Navigate to the download directory and extract:
+2. **Extract and install**
 
    ```bash
    tar -xzvf sol-v0.0.2-linux-amd64.tar.gz
-   ```
-
-   Options:
-   * `-x` — extract
-   * `-z` — use gzip
-   * `-v` — show progress
-   * `-f` — file
-
-3. **Navigate to the extracted directory**
-
-   ```bash
    cd sol-v0.0.2-linux-amd64
-   ```
-
-4. **Make the binary executable**
-
-   ```bash
    chmod +x sol
-   ```
-
-5. **Move binary to PATH directory**
-
-   To run `sol` from anywhere, move it to a directory in PATH:
-
-   ```bash
    sudo mv sol /usr/local/bin/sol
    ```
 
-6. **Verify installation**
+#### Linux ARM64 (aarch64)
+
+1. **Download the archive**
 
    ```bash
-   sol --help
+   wget https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-arm64.tar.gz
    ```
+
+   or using `curl`:
+
+   ```bash
+   curl -L -o sol-v0.0.2-linux-arm64.tar.gz https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-arm64.tar.gz
+   ```
+
+2. **Extract and install**
+
+   ```bash
+   tar -xzvf sol-v0.0.2-linux-arm64.tar.gz
+   cd sol-v0.0.2-linux-arm64
+   chmod +x sol
+   sudo mv sol /usr/local/bin/sol
+   ```
+
+#### Linux 386 (32-bit)
+
+1. **Download the archive**
+
+   ```bash
+   wget https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-386.tar.gz
+   ```
+
+   or using `curl`:
+
+   ```bash
+   curl -L -o sol-v0.0.2-linux-386.tar.gz https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-linux-386.tar.gz
+   ```
+
+2. **Extract and install**
+
+   ```bash
+   tar -xzvf sol-v0.0.2-linux-386.tar.gz
+   cd sol-v0.0.2-linux-386
+   chmod +x sol
+   sudo mv sol /usr/local/bin/sol
+   ```
+
+### macOS
+
+#### macOS AMD64 (Intel)
+
+1. **Download the archive**
+
+   ```bash
+   curl -L -o sol-v0.0.2-darwin-amd64.tar.gz https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-darwin-amd64.tar.gz
+   ```
+
+2. **Extract and install**
+
+   ```bash
+   tar -xzvf sol-v0.0.2-darwin-amd64.tar.gz
+   cd sol-v0.0.2-darwin-amd64
+   chmod +x sol
+   sudo mv sol /usr/local/bin/sol
+   ```
+
+#### macOS ARM64 (Apple Silicon - M1/M2/M3)
+
+1. **Download the archive**
+
+   ```bash
+   curl -L -o sol-v0.0.2-darwin-arm64.tar.gz https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-darwin-arm64.tar.gz
+   ```
+
+2. **Extract and install**
+
+   ```bash
+   tar -xzvf sol-v0.0.2-darwin-arm64.tar.gz
+   cd sol-v0.0.2-darwin-arm64
+   chmod +x sol
+   sudo mv sol /usr/local/bin/sol
+   ```
+
+### Windows
+
+#### Windows AMD64 (64-bit)
+
+1. **Download the archive**
+
+   Using PowerShell:
+
+   ```powershell
+   Invoke-WebRequest -Uri "https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-windows-amd64.zip" -OutFile "sol-v0.0.2-windows-amd64.zip"
+   ```
+
+   Or using Command Prompt:
+
+   ```cmd
+   curl -L -o sol-v0.0.2-windows-amd64.zip https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-windows-amd64.zip
+   ```
+
+2. **Extract and install**
+
+   ```powershell
+   Expand-Archive -Path "sol-v0.0.2-windows-amd64.zip" -DestinationPath "sol-v0.0.2-windows-amd64"
+   cd sol-v0.0.2-windows-amd64
+   move sol.exe C:\Windows\System32\sol.exe
+   ```
+
+#### Windows 386 (32-bit)
+
+1. **Download the archive**
+
+   ```powershell
+   Invoke-WebRequest -Uri "https://github.com/bavix/sol/releases/download/v0.0.2/sol-v0.0.2-windows-386.zip" -OutFile "sol-v0.0.2-windows-386.zip"
+   ```
+
+2. **Extract and install**
+
+   ```powershell
+   Expand-Archive -Path "sol-v0.0.2-windows-386.zip" -DestinationPath "sol-v0.0.2-windows-386"
+   cd sol-v0.0.2-windows-386
+   move sol.exe C:\Windows\System32\sol.exe
+   ```
+
+### Verify Installation
+
+After installation on any platform:
+
+```bash
+sol --help
+```
+
+### Architecture Detection
+
+To determine your system architecture:
+
+**Linux/macOS:**
+```bash
+uname -m
+```
+
+**Windows:**
+```cmd
+echo %PROCESSOR_ARCHITECTURE%
+```
 
 ### Systemd Service Setup
 
