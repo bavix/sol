@@ -10,6 +10,7 @@ linters:
     - wsl
     - tagliatelle
     - noinlineerr
+    - ireturn
   settings:
     depguard:
       rules:
